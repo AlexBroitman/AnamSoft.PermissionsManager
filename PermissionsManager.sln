@@ -7,6 +7,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PermissionsManager", "Permi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PermissionsManager.Tests", "PermissionsManager.Tests\PermissionsManager.Tests.csproj", "{049E9A45-F7A6-4ECF-B15C-74770CBD23C6}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BD0399A7-1EF1-4D8D-9B33-7A7B730486B4}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHubWorkflows", "GitHubWorkflows", "{9C710BAA-F566-4510-A16E-DFD8914EE799}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\MasterBuild.yml = .github\workflows\MasterBuild.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,6 +34,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9C710BAA-F566-4510-A16E-DFD8914EE799} = {BD0399A7-1EF1-4D8D-9B33-7A7B730486B4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BD749C87-2128-401D-A4AA-CB9EC359C669}
