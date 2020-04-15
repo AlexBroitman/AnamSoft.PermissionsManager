@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Description>PermissionsManager is a generic implementation of PermissionsManager for Clarizen.</Description>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>8.0</LangVersion>
+    <RootNamespace>AnamSoft.PermissionsManager</RootNamespace>
+    <Authors>Alex Broitman</Authors>
+    <Company>AnamSoft</Company>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageId>AnamSoft.PermissionsManager</PackageId>
+    <Copyright>AnamSoft</Copyright>
+    <RepositoryUrl>https://github.com/AlexBroitman/AnamSoft.PermissionsManager</RepositoryUrl>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RepositoryType>Public</RepositoryType>
+    <PackageTags>PermissionsManager;Permissions;Roles</PackageTags>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="AnamSoft.PermissionsManager" Version="1.0.0" />
+  </ItemGroup>
+</Project>

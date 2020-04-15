@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30002.166
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PermissionsManager", "PermissionsManager\PermissionsManager.csproj", "{3AB01EA7-C062-46AD-B703-843427959693}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PermissionsManager.Tests", "PermissionsManager.Tests\PermissionsManager.Tests.csproj", "{049E9A45-F7A6-4ECF-B15C-74770CBD23C6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3AB01EA7-C062-46AD-B703-843427959693}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AB01EA7-C062-46AD-B703-843427959693}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AB01EA7-C062-46AD-B703-843427959693}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AB01EA7-C062-46AD-B703-843427959693}.Release|Any CPU.Build.0 = Release|Any CPU
+		{049E9A45-F7A6-4ECF-B15C-74770CBD23C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{049E9A45-F7A6-4ECF-B15C-74770CBD23C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{049E9A45-F7A6-4ECF-B15C-74770CBD23C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{049E9A45-F7A6-4ECF-B15C-74770CBD23C6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BD749C87-2128-401D-A4AA-CB9EC359C669}
+	EndGlobalSection
+EndGlobal
