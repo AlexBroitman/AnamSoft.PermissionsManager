@@ -8,7 +8,7 @@
     <Company>AnamSoft</Company>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>AnamSoft.PermissionsManager</PackageId>
-    <Copyright>AnamSoft</Copyright>
+    <Copyright>Copyright © Alex Broitman</Copyright>
     <RepositoryUrl>https://github.com/AlexBroitman/AnamSoft.PermissionsManager</RepositoryUrl>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -18,6 +18,6 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AnamSoft.PermissionsManager" Version="1.0.0" />
+    <PackageReference Include="AnamSoft.DependencyGraph" Version="1.0.0" />
   </ItemGroup>
 </Project>
