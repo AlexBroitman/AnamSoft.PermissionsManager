@@ -5,12 +5,17 @@ using System.Collections.Generic;
 
 namespace AnamSoft.PermissionsManager
 {
+    /// <summary>
+    /// Generic InheritablePermissionsManager
+    /// </summary>
+    /// <inheritdoc/>
     public class InheritablePermissionsManager<TSubject, TObject, TRole> : PermissionsManager<TSubject, TObject, TRole>, IInheritablePermissionsManager<TSubject, TObject, TRole>
     {
         private readonly DependencyGraph<TSubject> _subjInheritance = new DependencyGraph<TSubject>();
         private readonly DependencyGraph<TObject> _objInheritance = new DependencyGraph<TObject>();
 
         #region IInheritablePermissionsManager
+        /// <inheritdoc/>
         public bool AddSubjectInheritance(TSubject inheritor, TSubject origin)
         {
             if (inheritor is null) throw new ArgumentNullException(nameof(inheritor));
@@ -19,6 +24,7 @@ namespace AnamSoft.PermissionsManager
             return _subjInheritance.AddDependency(inheritor, origin);
         }
 
+        /// <inheritdoc/>
         public bool RemoveSubjectInheritance(TSubject inheritor, TSubject origin)
         {
             if (inheritor is null) throw new ArgumentNullException(nameof(inheritor));
@@ -27,6 +33,7 @@ namespace AnamSoft.PermissionsManager
             return _subjInheritance.RemoveDependency(inheritor, origin);
         }
 
+        /// <inheritdoc/>
         public bool AddObjectInheritance(TObject inheritor, TObject origin)
         {
             if (inheritor is null) throw new ArgumentNullException(nameof(inheritor));
@@ -35,6 +42,7 @@ namespace AnamSoft.PermissionsManager
             return _objInheritance.AddDependency(inheritor, origin);
         }
 
+        /// <inheritdoc/>
         public bool RemoveObjectInheritance(TObject inheritor, TObject origin)
         {
             if (inheritor is null) throw new ArgumentNullException(nameof(inheritor));
@@ -42,6 +50,7 @@ namespace AnamSoft.PermissionsManager
             return _objInheritance.RemoveDependency(inheritor, origin);
         }
 
+        /// <inheritdoc/>
         public bool IsSubjectInherits(TSubject inheritor, TSubject origin)
         {
             if (inheritor is null) throw new ArgumentNullException(nameof(inheritor));
@@ -50,6 +59,7 @@ namespace AnamSoft.PermissionsManager
             return _subjInheritance.IsDepends(inheritor, origin);
         }
 
+        /// <inheritdoc/>
         public bool IsObjectInherits(TObject inheritor, TObject origin)
         {
             if (inheritor is null) throw new ArgumentNullException(nameof(inheritor));
@@ -58,20 +68,30 @@ namespace AnamSoft.PermissionsManager
             return _objInheritance.IsDepends(inheritor, origin);
         }
 
-        public IReadOnlyCollection<TRole> GetDirectRoles(TSubject subj, TObject obj)
+        /// <summary>
+        /// Gets direct roles that <paramref name="subj"/> has on <paramref name="obj"/>.
+        /// </summary>
+        /// <param name="subj">The subject.</param>
+        /// <param name="obj">The object.</param>
+        /// <returns><see cref="IReadOnlyCollection{T}"/> that contains direct roles that <paramref name="subj"/> has on <paramref name="obj"/>.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="subj"/> or <paramref name="obj"/> are <see langword="null"/>.</exception>
+        public RoleCollection GetDirectRoles(TSubject subj, TObject obj)
         {
             if (subj is null) throw new ArgumentNullException(nameof(subj));
             if (obj is null) throw new ArgumentNullException(nameof(obj));
 
-            return new RoleCollection(base.GetRolesHashSet(subj, obj));
+            return new RoleCollection(base.GetDirectRolesHashSet(subj, obj));
         }
+
+        IReadOnlyCollection<TRole> IInheritablePermissionsManager<TSubject, TObject, TRole>.GetDirectRoles(TSubject subj, TObject obj) => GetDirectRoles(subj, obj);
         #endregion
 
         #region Overrides
-        protected override HashSet<TRole> GetRolesHashSet(TSubject subj, TObject obj)
+        /// <inheritdoc/>
+        protected override HashSet<TRole> GetDirectRolesHashSet(TSubject subj, TObject obj)
         {
             // get direct roles
-            var roles = base.GetRolesHashSet(subj, obj);
+            var roles = base.GetDirectRolesHashSet(subj, obj);
 
             var originSubjs = _subjInheritance.GetDirectDependencies(subj);
             var originObjs = _objInheritance.GetDirectDependencies(obj);
@@ -90,6 +110,16 @@ namespace AnamSoft.PermissionsManager
             return roles;
         }
 
+        /// <summary>Clears the <see cref="InheritablePermissionsManager{TSubject, TObject, TRole}"/>.</summary>
+        public override void Clear()
+        {
+            base.Clear();
+            _subjInheritance.Clear();
+            _objInheritance.Clear();
+        }
+        #endregion
+
+        #region Private Methods
         private void AddInheritedRolesFromSubjects(HashSet<TRole> roles, TSubject subj, TObject obj, IReadOnlySet<TSubject> originSubjs)
         {
             var processedSubjects = new HashSet<TSubject> { subj };
@@ -99,7 +129,7 @@ namespace AnamSoft.PermissionsManager
                 var originSubj = subjStack.Pop();
                 if (!processedSubjects.Contains(originSubj))
                 {
-                    var originRoles = base.GetRolesHashSet(originSubj, obj);
+                    var originRoles = base.GetDirectRolesHashSet(originSubj, obj);
                     roles.UnionWith(originRoles);
 
                     foreach (var subOriginSubj in _subjInheritance.GetDirectDependencies(originSubj))
@@ -119,7 +149,7 @@ namespace AnamSoft.PermissionsManager
                 var originObj = objStack.Pop();
                 if (!processedObjects.Contains(originObj))
                 {
-                    var originRoles = base.GetRolesHashSet(subj, originObj);
+                    var originRoles = base.GetDirectRolesHashSet(subj, originObj);
                     roles.UnionWith(originRoles);
 
                     foreach (var subOriginObj in _objInheritance.GetDirectDependencies(originObj))
@@ -128,13 +158,6 @@ namespace AnamSoft.PermissionsManager
                     processedObjects.Add(originObj);
                 }
             }
-        }
-
-        public override void Clear()
-        {
-            base.Clear();
-            _subjInheritance.Clear();
-            _objInheritance.Clear();
         }
         #endregion
     }
