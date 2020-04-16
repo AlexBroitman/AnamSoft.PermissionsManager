@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
 
 namespace AnamSoft.PermissionsManager
 {
@@ -11,7 +10,7 @@ namespace AnamSoft.PermissionsManager
     public class ObservablePermissionsManager<TSubject, TObject, TRole> : PermissionsManager<TSubject, TObject, TRole>, INotifyPermissionChanged<TSubject, TObject, TRole>
     {
         /// <inheritdoc/>
-        public event PermissionChangedEventHandler<TSubject, TObject, TRole>? PermissionChanged;
+        public event EventHandler<PermissionChangedEventArgs<TSubject, TObject, TRole>>? PermissionChanged;
 
         /// <summary>
         /// Initializes new instance of the <see cref="ObservablePermissionsManager{TSubject, TObject, TRole}"/> class.
