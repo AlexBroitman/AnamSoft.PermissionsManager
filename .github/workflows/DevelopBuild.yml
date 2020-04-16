@@ -1,0 +1,40 @@
+name: DevelopBuild
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    types: [ closed ]
+    branches: [ develop ]
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+    steps:
+    - name: Start
+      run: echo 'Started at ${{ steps.start.outputs.time }}.'
+      id: start
+    - name: Checkout
+      uses: actions/checkout@v2
+      id: co
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.101
+      id: setup
+    - name: Install dependencies
+      run: dotnet restore
+      id: restore
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+      id: build
+    - name: Test
+      run: dotnet test --no-restore --verbosity normal
+      id: test
+    - name: Finish
+      run: echo 'Finished at ${{ steps.finish.outputs.time }}.'
+      id: finish
