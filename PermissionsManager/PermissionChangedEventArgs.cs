@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 
 namespace AnamSoft.PermissionsManager
 {
@@ -20,7 +19,7 @@ namespace AnamSoft.PermissionsManager
         /// <param name="newRoles">Added roles.</param>
         public PermissionChangedEventArgs(PermissionChangedAction action, TSubject subj = default, TObject obj = default, IEnumerable<TRole> oldRoles = null, IEnumerable<TRole> newRoles = null)
         {
-            ValidateArgs(action, subj, obj, oldRoles, newRoles);
+            AssertArgs(action, subj, obj, oldRoles, newRoles);
             Action = action;
             Subject = subj;
             Object = obj;
@@ -28,7 +27,7 @@ namespace AnamSoft.PermissionsManager
             NewRoles = newRoles;
         }
 
-        private static void ValidateArgs(PermissionChangedAction action, TSubject subj, TObject obj, IEnumerable<TRole> oldRoles, IEnumerable<TRole> newRoles)
+        private static void AssertArgs(PermissionChangedAction action, TSubject subj, TObject obj, IEnumerable<TRole> oldRoles, IEnumerable<TRole> newRoles)
         {
             if (action == PermissionChangedAction.Add || action == PermissionChangedAction.Remove)
             {

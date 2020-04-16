@@ -9,27 +9,33 @@ namespace AnamSoft.PermissionsManager
     /// </summary>
     public class ObservablePermissionsManager<TSubject, TObject, TRole> : PermissionsManager<TSubject, TObject, TRole>, INotifyPermissionChanged<TSubject, TObject, TRole>
     {
-        /// <inheritdoc/>
-        public event EventHandler<PermissionChangedEventArgs<TSubject, TObject, TRole>>? PermissionChanged;
-
         /// <summary>
         /// Initializes new instance of the <see cref="ObservablePermissionsManager{TSubject, TObject, TRole}"/> class.
         /// </summary>
         public ObservablePermissionsManager()
         {
-
         }
+
+        /// <inheritdoc/>
+        public event EventHandler<PermissionChangedEventArgs<TSubject, TObject, TRole>>? PermissionChanged;
+
+        #region Overrides
+        /// <summary>
+        /// Raises the <see cref="PermissionChanged"/> event with the provided arguments.
+        /// </summary>
+        /// <param name="ea">Arguments of the event being raised.</param>
+        protected virtual void OnPermissionChanged(PermissionChangedEventArgs<TSubject, TObject, TRole> ea) => PermissionChanged?.Invoke(this, ea);
 
         /// <inheritdoc/>
         /// <summary>
         /// Adds a <paramref name="role"/> for the <paramref name="subj"/> on the <paramref name="obj"/> and notifies the subscribers.
         /// </summary>
-        public override bool AddRole(TSubject subj, TObject obj, TRole role)
+        protected override bool AddRoleTrusted(TSubject subj, TObject obj, TRole role)
         {
-            if (!base.AddRole(subj, obj, role))
+            if (!base.AddRoleTrusted(subj, obj, role))
                 return false;
 
-            PermissionChanged?.Invoke(this, new PermissionChangedEventArgs<TSubject, TObject, TRole>(PermissionChangedAction.Add, subj, obj, newRoles: new[] { role }));
+            OnPermissionChanged(new PermissionChangedEventArgs<TSubject, TObject, TRole>(PermissionChangedAction.Add, subj, obj, newRoles: new[] { role }));
             return true;
         }
 
@@ -37,12 +43,12 @@ namespace AnamSoft.PermissionsManager
         /// <summary>
         /// Adds <paramref name="roles"/> for the <paramref name="subj"/> on the <paramref name="obj"/> and notofies the subscribers.
         /// </summary>
-        public override bool AddRoles(TSubject subj, TObject obj, IEnumerable<TRole> roles)
+        protected override bool AddRolesTrusted(TSubject subj, TObject obj, IEnumerable<TRole> roles)
         {
-            if (!base.AddRoles(subj, obj, roles))
+            if (!base.AddRolesTrusted(subj, obj, roles))
                 return false;
 
-            PermissionChanged?.Invoke(this, new PermissionChangedEventArgs<TSubject, TObject, TRole>(PermissionChangedAction.Add, subj, obj, newRoles: roles));
+            OnPermissionChanged(new PermissionChangedEventArgs<TSubject, TObject, TRole>(PermissionChangedAction.Add, subj, obj, newRoles: roles));
             return true;
         }
 
@@ -50,22 +56,22 @@ namespace AnamSoft.PermissionsManager
         /// <summary>
         /// Sets <paramref name="roles"/> for the <paramref name="subj"/> on the <paramref name="obj"/> and notifies the subscribers.
         /// </summary>
-        public override void SetRoles(TSubject subj, TObject obj, IReadOnlyCollection<TRole> roles)
+        protected override void SetRolesTrusted(TSubject subj, TObject obj, IReadOnlyCollection<TRole> roles)
         {
-            base.SetRoles(subj, obj, roles);
-            PermissionChanged?.Invoke(this, new PermissionChangedEventArgs<TSubject, TObject, TRole>(PermissionChangedAction.Reset, subj, obj, newRoles: roles));
+            base.SetRolesTrusted(subj, obj, roles);
+            OnPermissionChanged(new PermissionChangedEventArgs<TSubject, TObject, TRole>(PermissionChangedAction.Reset, subj, obj, newRoles: roles));
         }
 
         /// <inheritdoc/>
         /// <summary>
         /// Removes a <paramref name="role"/> from the <paramref name="subj"/> on the <paramref name="obj"/> and notifies the subscribers.
         /// </summary>
-        public override bool RemoveRole(TSubject subj, TObject obj, TRole role)
+        protected override bool RemoveRoleTrusted(TSubject subj, TObject obj, TRole role)
         {
-            if (!base.RemoveRole(subj, obj, role))
+            if (!base.RemoveRoleTrusted(subj, obj, role))
                 return false;
 
-            PermissionChanged?.Invoke(this, new PermissionChangedEventArgs<TSubject, TObject, TRole>(PermissionChangedAction.Remove, subj, obj, oldRoles: new[] { role }));
+            OnPermissionChanged(new PermissionChangedEventArgs<TSubject, TObject, TRole>(PermissionChangedAction.Remove, subj, obj, oldRoles: new[] { role }));
             return true;
         }
 
@@ -73,11 +79,12 @@ namespace AnamSoft.PermissionsManager
         /// <summary>
         /// Removes <paramref name="roles"/> from the <paramref name="subj"/> on the <paramref name="obj"/> and notifies the subscribers.
         /// </summary>
-        public override bool RemoveRoles(TSubject subj, TObject obj, IEnumerable<TRole> roles)
+        protected override bool RemoveRolesTrusted(TSubject subj, TObject obj, IEnumerable<TRole> roles)
         {
-            if (!base.RemoveRoles(subj, obj, roles))
+            if (!base.RemoveRolesTrusted(subj, obj, roles))
                 return false;
-            PermissionChanged?.Invoke(this, new PermissionChangedEventArgs<TSubject, TObject, TRole>(PermissionChangedAction.Remove, subj, obj, oldRoles: roles));
+
+            OnPermissionChanged(new PermissionChangedEventArgs<TSubject, TObject, TRole>(PermissionChangedAction.Remove, subj, obj, oldRoles: roles));
             return true;
         }
 
@@ -85,11 +92,12 @@ namespace AnamSoft.PermissionsManager
         /// <summary>
         /// Removes all roles from the subject <paramref name="subj"/> and notifies the subscribers.
         /// </summary>
-        public override bool RemoveAllSubjectRoles(TSubject subj)
+        protected override bool RemoveAllSubjectRolesTrusted(TSubject subj)
         {
-            if (!base.RemoveAllSubjectRoles(subj))
+            if (!base.RemoveAllSubjectRolesTrusted(subj))
                 return false;
-            PermissionChanged?.Invoke(this, new PermissionChangedEventArgs<TSubject, TObject, TRole>(PermissionChangedAction.Remove, subj: subj));
+
+            OnPermissionChanged(new PermissionChangedEventArgs<TSubject, TObject, TRole>(PermissionChangedAction.Remove, subj: subj));
             return true;
         }
 
@@ -97,11 +105,12 @@ namespace AnamSoft.PermissionsManager
         /// <summary>
         /// Removes all roles that were on the object <paramref name="obj"/> and notifies the subscribers.
         /// </summary>
-        public override bool RemoveAllObjectRoles(TObject obj)
+        protected override bool RemoveAllObjectRolesTrusted(TObject obj)
         {
-            if (!base.RemoveAllObjectRoles(obj))
+            if (!base.RemoveAllObjectRolesTrusted(obj))
                 return false;
-            PermissionChanged?.Invoke(this, new PermissionChangedEventArgs<TSubject, TObject, TRole>(PermissionChangedAction.Remove, obj: obj));
+
+            OnPermissionChanged(new PermissionChangedEventArgs<TSubject, TObject, TRole>(PermissionChangedAction.Remove, obj: obj));
             return true;
         }
 
@@ -109,21 +118,23 @@ namespace AnamSoft.PermissionsManager
         /// <summary>
         /// Removes all roles from the subject <paramref name="subj"/> on the object <paramref name="obj"/> and notifies the subscribers.
         /// </summary>
-        public override bool RemoveAllRoles(TSubject subj, TObject obj)
+        protected override bool RemoveAllRolesTrusted(TSubject subj, TObject obj)
         {
-            if (!base.RemoveAllRoles(subj, obj))
+            if (!base.RemoveAllRolesTrusted(subj, obj))
                 return false;
-            PermissionChanged?.Invoke(this, new PermissionChangedEventArgs<TSubject, TObject, TRole>(PermissionChangedAction.Remove, subj, obj));
+
+            OnPermissionChanged(new PermissionChangedEventArgs<TSubject, TObject, TRole>(PermissionChangedAction.Remove, subj, obj));
             return true;
         }
 
         /// <summary>
         /// Clears the <see cref="ObservablePermissionsManager{TSubject, TObject, TRole}"/> and notifies to subscribers.
         /// </summary>
-        public override void Clear()
+        protected override void ClearItems()
         {
-            base.Clear();
-            PermissionChanged?.Invoke(this, new PermissionChangedEventArgs<TSubject, TObject, TRole>(PermissionChangedAction.Reset));
+            base.ClearItems();
+            OnPermissionChanged(new PermissionChangedEventArgs<TSubject, TObject, TRole>(PermissionChangedAction.Reset));
         }
+        #endregion
     }
 }

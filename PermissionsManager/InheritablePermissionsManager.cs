@@ -110,10 +110,10 @@ namespace AnamSoft.PermissionsManager
             return roles;
         }
 
-        /// <summary>Clears the <see cref="InheritablePermissionsManager{TSubject, TObject, TRole}"/>.</summary>
-        public override void Clear()
+        /// <inheritdoc/>
+        protected override void ClearItems()
         {
-            base.Clear();
+            base.ClearItems();
             _subjInheritance.Clear();
             _objInheritance.Clear();
         }

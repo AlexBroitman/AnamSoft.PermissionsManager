@@ -45,21 +45,12 @@ namespace AnamSoft.PermissionsManager
         IReadOnlyCollection<TRole> IPermissionsManager<TSubject, TObject, TRole>.GetRoles(TSubject subj, TObject obj) => GetRoles(subj, obj);
 
         /// <inheritdoc/>
-        public virtual void SetRoles(TSubject subj, TObject obj, IReadOnlyCollection<TRole> roles)
+        public void SetRoles(TSubject subj, TObject obj, IReadOnlyCollection<TRole> roles)
         {
             if (subj is null) throw new ArgumentNullException(nameof(subj));
             if (obj is null) throw new ArgumentNullException(nameof(obj));
             if (roles is null) throw new ArgumentNullException(nameof(roles));
-
-            if (Storage.TryGetValue(subj, out var allSubjRoles))
-            {
-                if (roles.Count == 0)
-                    allSubjRoles.Remove(obj);
-                else
-                    allSubjRoles[obj] = new HashSet<TRole>(roles);
-            }
-            else if (roles.Count > 0)
-                Storage[subj] = new Dictionary<TObject, HashSet<TRole>> { [obj] = new HashSet<TRole>(roles) };
+            SetRolesTrusted(subj, obj, roles);
         }
 
         /// <inheritdoc/>
@@ -76,95 +67,61 @@ namespace AnamSoft.PermissionsManager
         }
 
         /// <inheritdoc/>
-        public virtual bool AddRole(TSubject subj, TObject obj, TRole role)
+        public bool AddRole(TSubject subj, TObject obj, TRole role)
         {
             if (subj is null) throw new ArgumentNullException(nameof(subj));
             if (obj is null) throw new ArgumentNullException(nameof(obj));
             if (role is null) throw new ArgumentNullException(nameof(role));
-
-            if (Storage.TryGetValue(subj, out var allSubjRoles))
-            {
-                if (allSubjRoles.TryGetValue(obj, out var existingRoles))
-                    return existingRoles.Add(role);
-
-                allSubjRoles.Add(obj, new HashSet<TRole> { role });
-            }
-            else
-                Storage.Add(subj, new Dictionary<TObject, HashSet<TRole>> { [obj] = new HashSet<TRole> { role } });
-            return true;
+            return AddRoleTrusted(subj, obj, role);
         }
 
         /// <inheritdoc/>
-        public virtual bool AddRoles(TSubject subj, TObject obj, IEnumerable<TRole> roles)
+        public bool AddRoles(TSubject subj, TObject obj, IEnumerable<TRole> roles)
         {
             if (subj is null) throw new ArgumentNullException(nameof(subj));
             if (obj is null) throw new ArgumentNullException(nameof(obj));
             if (roles is null) throw new ArgumentNullException(nameof(roles));
-
-            if (Storage.TryGetValue(subj, out var allSubjRoles))
-            {
-                if (allSubjRoles.TryGetValue(obj, out var existingRoles))
-                    return roles.Aggregate(false, (res, role) => res | existingRoles.Add(role));
-
-                var newRoles = new HashSet<TRole>(roles);
-                if (newRoles.Count == 0)
-                    return false;
-
-                allSubjRoles.Add(obj, newRoles);
-                return true;
-            }
-            else
-            {
-                var newRoles = new HashSet<TRole>(roles);
-                if (newRoles.Count == 0)
-                    return false;
-
-                Storage.Add(subj, new Dictionary<TObject, HashSet<TRole>> { [obj] = newRoles });
-                return true;
-            }
+            return AddRolesTrusted(subj, obj, roles);
         }
 
         /// <inheritdoc/>
-        public virtual bool RemoveRole(TSubject subj, TObject obj, TRole role)
+        public bool RemoveRole(TSubject subj, TObject obj, TRole role)
         {
             if (subj is null) throw new ArgumentNullException(nameof(subj));
             if (obj is null) throw new ArgumentNullException(nameof(obj));
             if (role is null) throw new ArgumentNullException(nameof(role));
-
-            return Storage.TryGetValue(subj, out var allSubjRoles) && allSubjRoles.TryGetValue(obj, out var roles) && roles.Remove(role);
+            return RemoveRoleTrusted(subj, obj, role);
         }
 
         /// <inheritdoc/>
-        public virtual bool RemoveRoles(TSubject subj, TObject obj, IEnumerable<TRole> roles)
+        public bool RemoveRoles(TSubject subj, TObject obj, IEnumerable<TRole> roles)
         {
             if (subj is null) throw new ArgumentNullException(nameof(subj));
             if (obj is null) throw new ArgumentNullException(nameof(obj));
             if (roles is null) throw new ArgumentNullException(nameof(roles));
-
-            return Storage.TryGetValue(subj, out var allSubjRoles) && allSubjRoles.TryGetValue(obj, out var existingRoles)
-                && roles.Aggregate(false, (res, role) => res | existingRoles.Remove(role));
+            return RemoveRolesTrusted(subj, obj, roles);
         }
 
         /// <inheritdoc/>
-        public virtual bool RemoveAllSubjectRoles(TSubject subj)
+        public bool RemoveAllSubjectRoles(TSubject subj)
         {
             if (subj is null) throw new ArgumentNullException(nameof(subj));
-            return Storage.Remove(subj);
+            return RemoveAllSubjectRolesTrusted(subj);
         }
 
         /// <inheritdoc/>
-        public virtual bool RemoveAllObjectRoles(TObject obj)
+        public bool RemoveAllObjectRoles(TObject obj)
         {
             if (obj is null) throw new ArgumentNullException(nameof(obj));
-            return Storage.Values.Aggregate(false, (res, roles) => res | roles.Remove(obj));
+            return RemoveAllObjectRolesTrusted(obj);
         }
 
         /// <inheritdoc/>
-        public virtual bool RemoveAllRoles(TSubject subj, TObject obj)
+        public bool RemoveAllRoles(TSubject subj, TObject obj)
         {
             if (subj is null) throw new ArgumentNullException(nameof(subj));
             if (obj is null) throw new ArgumentNullException(nameof(obj));
-            return Storage.TryGetValue(subj, out var allSubjRoles) && allSubjRoles.Remove(obj);
+            return RemoveAllRolesTrusted(subj, obj);
         }
 
         /// <inheritdoc/>
@@ -200,7 +157,78 @@ namespace AnamSoft.PermissionsManager
         /// <summary>
         /// Clears the <see cref="PermissionsManager{TSubject, TObject, TRole}"/>.
         /// </summary>
-        public virtual void Clear() => Storage.Clear();
+        public void Clear() => ClearItems();
+
+        #region Protected
+        protected virtual void SetRolesTrusted(TSubject subj, TObject obj, IReadOnlyCollection<TRole> roles)
+        {
+            if (Storage.TryGetValue(subj, out var allSubjRoles))
+            {
+                if (roles.Count == 0)
+                    allSubjRoles.Remove(obj);
+                else
+                    allSubjRoles[obj] = new HashSet<TRole>(roles);
+            }
+            else if (roles.Count > 0)
+                Storage[subj] = new Dictionary<TObject, HashSet<TRole>> { [obj] = new HashSet<TRole>(roles) };
+        }
+
+        protected virtual bool AddRoleTrusted(TSubject subj, TObject obj, TRole role)
+        {
+            if (Storage.TryGetValue(subj, out var allSubjRoles))
+            {
+                if (allSubjRoles.TryGetValue(obj, out var existingRoles))
+                    return existingRoles.Add(role);
+
+                allSubjRoles.Add(obj, new HashSet<TRole> { role });
+            }
+            else
+                Storage.Add(subj, new Dictionary<TObject, HashSet<TRole>> { [obj] = new HashSet<TRole> { role } });
+            return true;
+        }
+
+        protected virtual bool AddRolesTrusted(TSubject subj, TObject obj, IEnumerable<TRole> roles)
+        {
+            if (Storage.TryGetValue(subj, out var allSubjRoles))
+            {
+                if (allSubjRoles.TryGetValue(obj, out var existingRoles))
+                    return roles.Aggregate(false, (res, role) => res | existingRoles.Add(role));
+
+                var newRoles = new HashSet<TRole>(roles);
+                if (newRoles.Count == 0)
+                    return false;
+
+                allSubjRoles.Add(obj, newRoles);
+                return true;
+            }
+            else
+            {
+                var newRoles = new HashSet<TRole>(roles);
+                if (newRoles.Count == 0)
+                    return false;
+
+                Storage.Add(subj, new Dictionary<TObject, HashSet<TRole>> { [obj] = newRoles });
+                return true;
+            }
+        }
+
+        protected virtual bool RemoveRoleTrusted(TSubject subj, TObject obj, TRole role)
+            => Storage.TryGetValue(subj, out var allSubjRoles) && allSubjRoles.TryGetValue(obj, out var roles) && roles.Remove(role);
+
+        protected virtual bool RemoveRolesTrusted(TSubject subj, TObject obj, IEnumerable<TRole> roles)
+            => Storage.TryGetValue(subj, out var allSubjRoles) && allSubjRoles.TryGetValue(obj, out var existingRoles)
+                && roles.Aggregate(false, (res, role) => res | existingRoles.Remove(role));
+
+        protected virtual bool RemoveAllSubjectRolesTrusted(TSubject subj) => Storage.Remove(subj);
+
+        protected virtual bool RemoveAllObjectRolesTrusted(TObject obj) => Storage.Values.Aggregate(false, (res, roles) => res | roles.Remove(obj));
+
+        protected virtual bool RemoveAllRolesTrusted(TSubject subj, TObject obj) => Storage.TryGetValue(subj, out var allSubjRoles) && allSubjRoles.Remove(obj);
+
+        /// <summary>
+        /// Clears the <see cref="PermissionsManager{TSubject, TObject, TRole}"/>.
+        /// </summary>
+        protected virtual void ClearItems() => Storage.Clear();
 
         /// <summary>
         /// Gets a <see cref="HashSet{T}"/> that contains all direct roles that subject <paramref name="subj"/> has on object <paramref name="obj"/>.
@@ -212,6 +240,7 @@ namespace AnamSoft.PermissionsManager
         /// <exception cref="ArgumentNullException"><paramref name="subj"/> or <paramref name="obj"/> are <see langword="null"/>.</exception>
         protected virtual HashSet<TRole> GetDirectRolesHashSet(TSubject subj, TObject obj)
             => Storage.TryGetValue(subj, out var allSubjRoles) && allSubjRoles.TryGetValue(obj, out var roles) ? roles : new HashSet<TRole>();
+        #endregion
 
         /// <summary>
         /// Read-only collection of roles
